@@ -44,6 +44,22 @@ glm::vec3 CameraPosition = glm::vec3(0.f, 0.f, 10);
 float fCameraSpeed = 0.5f;
 
 GLfloat* plane_vertices;
+
+//GLshort plane_indices[] =
+//{
+//	0, 4, 1,
+//	0, 3, 4,
+//
+//	1, 5, 2,
+//	1, 4, 5,
+//
+//	3, 7, 4,
+//	3, 6, 7,
+//
+//	4, 8, 5,
+//	4, 7, 8
+//};
+
 GLshort* plane_indices;
 
 
@@ -77,7 +93,8 @@ void init(void)
 		glm::vec3(0, 1, 0)		// Head is up (set to 0,-1,0 to look upside-down)
 	);
 
-	int iNumOfGrid = 3;
+	//Create Vertex
+	int iNumOfGrid = 7;
 	int iNumOfVertices = (iNumOfGrid + 1) * (iNumOfGrid + 1);
 	plane_vertices = new GLfloat[iNumOfVertices * 3];
 	int iIndex = 0;
@@ -86,8 +103,8 @@ void init(void)
 		for (int i = 0; i <= iNumOfGrid; ++i)
 		{
 			float x = (float)i / (float)iNumOfGrid;
-			float y = (float)j / (float)iNumOfGrid;
-			float z = 0;
+			float y = 0;
+			float z = (float)j / (float)iNumOfGrid;
 
 			plane_vertices[iIndex] = x;
 			plane_vertices[iIndex + 1] = y;
@@ -97,6 +114,7 @@ void init(void)
 		}
 	}
 
+	//Create Index
 	iNumOfPlaneIndices = (iNumOfGrid * iNumOfGrid) * 2 * 3;
 	plane_indices = new GLshort[iNumOfPlaneIndices];
 	iIndex = 0;
@@ -129,11 +147,13 @@ void init(void)
 		glGenBuffers(1, &ibo);
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLshort) * iNumOfPlaneIndices, plane_indices, GL_STATIC_DRAW);
+		//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(plane_indices), plane_indices, GL_STATIC_DRAW);
 
 		points_vbo = 0;
 		glGenBuffers(1, &points_vbo);
 		glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * iNumOfVertices, plane_vertices, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * iNumOfVertices * 3, plane_vertices, GL_STATIC_DRAW);
+		//glBufferData(GL_ARRAY_BUFFER, sizeof(plane_vertices), plane_vertices, GL_STATIC_DRAW);
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 		glEnableVertexAttribArray(0);
 
@@ -296,9 +316,9 @@ void display(void)
 	//glBindTexture(GL_TEXTURE_2D, cube_tex);
 	glBindVertexArray(vao);
 
-	transformObject(glm::vec3(3.f, 3.f, 3.f), Y_AXIS, 0.f, glm::vec3(0.0f, 0.0f, 0.0f));
+	transformObject(glm::vec3(5.f, 5.f, 5.f), Y_AXIS, 0.f, glm::vec3(0.0f, 0.0f, 0.0f));
 	glDrawElements(GL_TRIANGLES, iNumOfPlaneIndices, GL_UNSIGNED_SHORT, 0);
-
+	//glDrawElements(GL_TRIANGLES, sizeof(plane_indices) / sizeof(GLshort), GL_UNSIGNED_SHORT, 0);
 
 	glutSwapBuffers(); // Instead of double buffering.
 }
@@ -383,8 +403,16 @@ int main(int argc, char** argv)
 	glutMouseFunc(mouseDown);
 	glutPassiveMotionFunc(mouseMove); // or...
 	//glutMotionFunc(mouseMove); // Requires click to register.
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	glutMainLoop();
 
-	//delete[] plane_vertices;
-	//delete[] plane_indices;
+
+
+	delete[] plane_vertices;
+	delete[] plane_indices;
 }
